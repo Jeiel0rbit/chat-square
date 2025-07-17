@@ -74,7 +74,7 @@
         const desktopUserCountEl = document.getElementById('desktop-user-count');
         const mobileUserCountEl = document.getElementById('mobile-user-count');
 
-        const socket = io("http://localhost:8000");
+        const socket = io();
 
         socket.on('nickname-assigned', (nickname) => {
             myNicknameSpan.textContent = nickname;
