@@ -1,162 +1,145 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deno Chat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-        html { scroll-behavior: smooth; }
-        body, #app { height: 100vh; overflow: hidden; }
-        #messages::-webkit-scrollbar { width: 8px; }
-        #messages::-webkit-scrollbar-track { background: #f0f0f0; }
-        #messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        #messages::-webkit-scrollbar-thumb:hover { background: #aaa; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deno Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    html { scroll-behavior: smooth; }
+    /* Scroll interno das mensagens */
+    #messages::-webkit-scrollbar { width: 6px; }
+    #messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    #messages::-webkit-scrollbar-thumb:hover { background: #aaa; }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans h-screen overflow-hidden">
 
-    <div id="app" class="grid grid-cols-1 md:grid-cols-4">
+  <div id="app" class="flex flex-col md:grid md:grid-cols-4 h-full">
 
-        <!-- Coluna Principal do Chat -->
-        <div class="md:col-span-3 flex flex-col h-full bg-white">
-            <!-- CABEÇALHO ATUALIZADO -->
-            <header class="p-4 border-b flex justify-between items-center">
-                <!-- Título e subtítulo agrupados -->
-                <div>
-                    <h1 class="text-xl font-bold text-gray-800">Chat em Tempo Real</h1>
-                    <p class="text-sm text-gray-600">Você é: <span id="my-nickname" class="font-semibold text-blue-600">...</span></p>
-                </div>
-                <!-- NOVO: Crachá de usuários online para telas pequenas -->
-                <div id="mobile-user-badge" class="md:hidden flex items-center bg-gray-200 text-gray-700 px-3 py-1 rounded-full">
-                    <i class="fa-solid fa-users mr-2"></i>
-                    <span id="mobile-user-count">0</span>
-                </div>
-            </header>
+    <!-- CHAT PRINCIPAL -->
+    <div class="md:col-span-3 flex flex-col bg-white h-full">
 
-            <ul id="messages" class="flex-1 p-4 overflow-y-auto space-y-2 bg-gray-50">
-                <!-- As mensagens aparecerão aqui -->
-            </ul>
-
-            <div id="error-notice" class="bg-red-500 text-white text-center p-2 opacity-0 h-10 transition-opacity"></div>
-
-            <footer class="p-4 bg-white border-t">
-                <form id="form" class="flex space-x-4">
-                    <input id="input" autocomplete="off" class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Digite sua mensagem..."/>
-                    <button class="bg-blue-600 text-white font-bold py-2 px-5 rounded-full hover:bg-blue-700 transition duration-300" type="submit">Enviar</button>
-                </form>
-            </footer>
+      <!-- HEADER FIXO -->
+      <header class="sticky top-0 z-10 bg-white border-b p-4 flex justify-between items-center">
+        <div>
+          <h1 class="text-lg font-bold text-gray-800">Chat em Tempo Real</h1>
+          <p class="text-sm text-gray-600">Você é: <span id="my-nickname" class="font-semibold text-blue-600">...</span></p>
         </div>
+        <div id="mobile-user-badge" class="md:hidden flex items-center bg-gray-200 px-2 py-1 rounded-full text-gray-700 text-sm">
+          <i class="fa-solid fa-users mr-1"></i><span id="mobile-user-count">0</span>
+        </div>
+      </header>
 
-        <!-- Coluna de Usuários Online (para telas grandes) -->
-        <aside class="md:col-span-1 bg-gray-100 border-l p-4 flex-col h-full hidden md:flex">
-            <h2 class="text-lg font-bold border-b pb-2 mb-4">Usuários Online (<span id="desktop-user-count">0</span>)</h2>
-            <ul id="user-list" class="space-y-2 overflow-y-auto">
-                <!-- A lista de usuários aparecerá aqui -->
-            </ul>
-        </aside>
+      <!-- MENSAGENS (scroll interno) -->
+      <ul id="messages" class="flex-1 min-h-0 p-4 overflow-y-auto space-y-2 bg-gray-50"></ul>
 
+      <!-- ERRO -->
+      <div id="error-notice" class="opacity-0 bg-red-500 text-white text-center py-1 text-sm transition-opacity"></div>
+
+      <!-- FOOTER FIXO -->
+      <footer class="sticky bottom-0 z-10 bg-white border-t p-3">
+        <form id="form" class="flex gap-2">
+          <input
+            id="input"
+            type="text"
+            autocomplete="off"
+            placeholder="Digite sua mensagem..."
+            class="flex-1 px-3 py-2 text-sm border rounded-full focus:ring-2 focus:ring-blue-500"
+          />
+          <button type="submit" class="px-4 py-2 text-sm font-semibold rounded-full bg-blue-600 text-white hover:bg-blue-700 transition">
+            Enviar
+          </button>
+        </form>
+      </footer>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <!-- USUÁRIOS ONLINE (desktop) -->
+    <aside class="hidden md:flex md:col-span-1 flex-col bg-gray-100 border-l p-4 overflow-y-auto">
+      <h2 class="mb-3 text-lg font-bold border-b pb-1">Usuários Online (<span id="desktop-user-count">0</span>)</h2>
+      <ul id="user-list" class="space-y-1 text-gray-700 text-sm"></ul>
+    </aside>
+  </div>
 
-    <script>
-        // ... (elementos do formulário e input)
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
-        const myNicknameSpan = document.getElementById('my-nickname');
-        const errorNotice = document.getElementById('error-notice');
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    const form = document.getElementById('form'),
+          input = document.getElementById('input'),
+          messages = document.getElementById('messages'),
+          nick = document.getElementById('my-nickname'),
+          err = document.getElementById('error-notice'),
+          userList = document.getElementById('user-list'),
+          desktopCount = document.getElementById('desktop-user-count'),
+          mobileCount = document.getElementById('mobile-user-count');
 
-        // Elementos da lista de usuários (desktop e mobile)
-        const userListEl = document.getElementById('user-list');
-        const desktopUserCountEl = document.getElementById('desktop-user-count');
-        const mobileUserCountEl = document.getElementById('mobile-user-count');
+    function escapeHTML(str) {
+      return str.replace(/&/g,'&amp;')
+                .replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;')
+                .replace(/"/g,'&quot;')
+                .replace(/'/g,'&#039;');
+    }
 
-        const socket = io();
+    function addSystemMsg(txt) {
+      const li = document.createElement('li');
+      li.textContent = txt;
+      li.className = 'text-center text-gray-500 italic text-sm';
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
+    }
 
-        socket.on('nickname-assigned', (nickname) => {
-            myNicknameSpan.textContent = nickname;
-            input.focus();
-            showSystemMessage("Você entrou no chat!");
-        });
-        
-        // --- ATUALIZADO: Listener para a lista de usuários ---
-        socket.on('update-user-list', (users) => {
-            // Atualiza o contador em ambas as visualizações (desktop e mobile)
-            desktopUserCountEl.textContent = users.length;
-            mobileUserCountEl.textContent = users.length;
+    function addError(txt) {
+      err.textContent = txt;
+      err.classList.remove('opacity-0');
+      setTimeout(() => err.classList.add('opacity-0'), 2500);
+    }
 
-            // Limpa e preenche a lista da barra lateral (desktop)
-            userListEl.innerHTML = ''; 
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.classList.add('p-2', 'rounded', 'hover:bg-gray-200', 'text-gray-700');
-                li.innerHTML = `<i class="fa-solid fa-circle text-green-500 text-xs mr-2"></i> ${escapeHTML(user)}`;
-                userListEl.appendChild(li);
-            });
-        });
+    function addMessage({ nickname, message }) {
+      const isMe = nickname === nick.textContent;
+      const li = document.createElement('li');
+      li.className = `max-w-full px-3 py-2 rounded-lg shadow break-words text-sm w-fit ${
+        isMe ? 'ml-auto bg-blue-500 text-white' : 'bg-white'
+      }`;
+      li.innerHTML = isMe
+        ? escapeHTML(message)
+        : `<span class="font-bold text-purple-600 text-sm">${escapeHTML(nickname)}</span><br>${escapeHTML(message)}`;
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
+    }
 
-        // ... (resto do código JavaScript permanece o mesmo)
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('chat-message', input.value);
-                input.value = '';
-            }
-        });
+    socket.on('nickname-assigned', n => {
+      nick.textContent = n;
+      input.focus();
+      addSystemMsg('Você entrou no chat!');
+    });
 
-        socket.on('chat-message', (data) => {
-            const item = createMessageElement(data);
-            messages.appendChild(item);
-            scrollToBottom();
-        });
+    socket.on('update-user-list', users => {
+      desktopCount.textContent = mobileCount.textContent = users.length;
+      userList.innerHTML = users.map(u =>
+        `<li class="flex items-center"><i class="fa-solid fa-circle text-green-500 text-xs mr-2"></i>${escapeHTML(u)}</li>`
+      ).join('');
+    });
 
-        socket.on('rate-limit-error', (message) => {
-            showError(message);
-        });
+    socket.on('chat-message', addMessage);
+    socket.on('user-connected', addSystemMsg);
+    socket.on('user-disconnected', addSystemMsg);
+    socket.on('rate-limit-error', addError);
 
-        function showError(message) {
-            errorNotice.textContent = message;
-            errorNotice.classList.remove('opacity-0');
-            setTimeout(() => {
-                errorNotice.classList.add('opacity-0');
-            }, 2500);
-        }
-
-        function createMessageElement(data) {
-            const item = document.createElement('li');
-            const isMe = data.nickname === myNicknameSpan.textContent;
-            item.classList.add('max-w-max', 'px-3', 'py-2', 'rounded-lg', 'shadow-sm', 'w-fit');
-            if (isMe) {
-                item.classList.add('ml-auto', 'bg-blue-500', 'text-white');
-                item.innerHTML = `<span>${escapeHTML(data.message)}</span>`;
-            } else {
-                item.classList.add('bg-white');
-                item.innerHTML = `<span class="font-bold text-sm block text-purple-600">${escapeHTML(data.nickname)}</span><span>${escapeHTML(data.message)}</span>`;
-            }
-            return item;
-        }
-
-        function showSystemMessage(msg) {
-            const item = document.createElement('li');
-            item.textContent = msg;
-            item.classList.add('text-center', 'text-gray-500', 'italic', 'text-sm', 'w-full');
-            messages.appendChild(item);
-            scrollToBottom();
-        }
-
-        socket.on('user-connected', showSystemMessage);
-        socket.on('user-disconnected', showSystemMessage);
-
-        function scrollToBottom() {
-            messages.scrollTop = messages.scrollHeight;
-        }
-        
-        function escapeHTML(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        }
-    </script>
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const msg = input.value.trim();
+      if (msg) {
+        socket.emit('chat-message', msg);
+        input.value = '';
+      }
+    });
+  </script>
 </body>
 </html>
