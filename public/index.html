@@ -34,6 +34,24 @@
 </head>
 <body class="bg-gray-100 font-sans h-screen overflow-hidden">
 
+  <!-- ===== Modal de Aviso ===== -->
+  <div id="warning-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+    <div class="bg-white rounded-lg shadow-2xl p-6 md:p-8 max-w-md w-full text-center">
+      <div class="text-red-500 mb-4">
+        <i class="fas fa-exclamation-triangle fa-3x"></i>
+      </div>
+      <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-3">Aviso Importante</h2>
+      <p class="text-gray-600 text-sm md:text-base mb-6">
+       <p>Este é um ambiente de chat aberto. Se o conteúdo ou as interações se tornarem inoportunas, a responsabilidade de <strong>fechar o chat</strong> é inteiramente sua. Da mesma forma, qualquer atividade ilegal é de sua responsabilidade.</p>
+      </p>
+      <button id="accept-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">
+        Entendi e quero prosseguir
+      </button>
+    </div>
+  </div>
+  <!-- ===== Fim do Modal ===== -->
+
+
   <div id="app" class="flex flex-col md:grid md:grid-cols-4 h-full">
 
     <div class="md:col-span-3 flex flex-col bg-white h-full">
@@ -77,16 +95,28 @@
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
-    const socket = io();
-    const form = document.getElementById('form'),
-          input = document.getElementById('input'),
-          messages = document.getElementById('messages'),
-          nick = document.getElementById('my-nickname'),
-          err = document.getElementById('error-notice'),
-          userList = document.getElementById('user-list'),
-          desktopCount = document.getElementById('desktop-user-count'),
-          mobileCount = document.getElementById('mobile-user-count');
+    // ===== Variáveis do Chat =====
+    const socket = io({ autoConnect: false }); // Desabilita a conexão automática
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const nick = document.getElementById('my-nickname');
+    const err = document.getElementById('error-notice');
+    const userList = document.getElementById('user-list');
+    const desktopCount = document.getElementById('desktop-user-count');
+    const mobileCount = document.getElementById('mobile-user-count');
 
+    // ===== Variáveis do Modal =====
+    const warningModal = document.getElementById('warning-modal');
+    const acceptButton = document.getElementById('accept-button');
+
+    // ===== Lógica do Modal =====
+    acceptButton.addEventListener('click', () => {
+      warningModal.classList.add('hidden'); // Esconde o modal
+      socket.connect(); // Conecta ao socket APÓS o aceite
+    });
+    
+    // ===== Funções do Chat =====
     function escapeHTML(str) {
       return str.replace(/&/g,'&amp;')
                 .replace(/</g,'&lt;')
@@ -122,6 +152,7 @@
       messages.scrollTop = messages.scrollHeight;
     }
 
+    // ===== Eventos do Socket.io =====
     socket.on('nickname-assigned', n => {
       nick.textContent = n;
       input.focus();
@@ -140,6 +171,7 @@
     socket.on('user-disconnected', addSystemMsg);
     socket.on('rate-limit-error', addError);
 
+    // ===== Evento do Formulário =====
     form.addEventListener('submit', e => {
       e.preventDefault();
       const msg = input.value.trim();
